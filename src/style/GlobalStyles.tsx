@@ -29,12 +29,12 @@ export const GlobalStyles = createGlobalStyle`
 
     scroll-behavior: smooth;
 
-    @media screen and (max-width: 1024px) {
+    /* @media screen and (max-width: 1024px) {
       font-size: 14px;
-    }
+    } */
 
     @media screen and (max-width: 768px) {
-      font-size: 13px;
+      font-size: 14px;
     }
   }
 

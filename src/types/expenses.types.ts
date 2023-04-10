@@ -8,6 +8,9 @@ export enum FixedExpenseCategory {
   Other = 'Other', // e.g. gifts, donations
 }
 
+export const FIXED_EXPENSE_CATEGORIES: FixedExpenseCategory[] =
+  Object.values(FixedExpenseCategory);
+
 export enum VariableExpenseCategory {
   Activities = 'Activities', // e.g. going to the cinema, going to the gym
   Education = 'Education', // e.g. books, courses
@@ -18,6 +21,9 @@ export enum VariableExpenseCategory {
   Travel = 'Travel', // e.g. public transport, taxi
   Other = 'Other', // e.g. gifts, donations, money transfers
 }
+
+export const VARIABLE_EXPENSE_CATEGORIES: VariableExpenseCategory[] =
+  Object.values(VariableExpenseCategory);
 
 type BaseExpenseItem = {
   id: string;

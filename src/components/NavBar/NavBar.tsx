@@ -8,8 +8,9 @@ import { useWindowSize } from '../hooks';
 
 enum Routes {
   HOME = '/',
-  FIXED_EXPENSES = '/fixed_expenses',
   VARIABLE_EXPENSES = '/variable_expenses',
+  FIXED_EXPENSES = '/fixed_expenses',
+  INCOME = '/income',
 }
 
 const StyledNavBar = styled.nav`
@@ -66,7 +67,7 @@ const StyledNavLink = styled(NavLink)`
     bottom: -2px;
     left: 0;
     width: 0;
-    height: 0.125rem;
+    height: 2px;
     background-color: ${({ theme }) => theme.colors.primary.main};
     transition: all ${({ theme }) => theme.transition.duration.L} ease-in-out;
 
@@ -216,7 +217,7 @@ const StyledHamburgerBtn = styled.button`
 const StyledHamburgerIcon = styled.div`
   position: absolute;
   width: 100%;
-  height: 0.125rem;
+  height: 2px;
 
   background-color: ${({ theme }) => theme.colors.body.text};
   border-radius: 0.5rem;

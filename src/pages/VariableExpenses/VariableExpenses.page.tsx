@@ -1,37 +1,12 @@
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  DatePicker,
-  Dropdown,
-  Input,
-  Table,
-  Text,
-} from '@src/components/common';
-import {
-  FixedExpenseCategory,
-  FixedExpenseItem,
-  VariableExpenseCategory,
-  VariableExpenseItem,
-} from '@src/types';
+import { Button, Table, Text } from '@src/components/common';
+import { VariableExpenseItem } from '@src/types';
 import { useExpenses } from '@src/context/ExpensesProvider';
-import { createUUID, formatDate, formatNumber } from '@src/utils';
+import { formatDate, formatNumber } from '@src/utils';
 import { SortOrder } from '@src/components/common/Table/Table.types';
-import { ObjectTable } from '@src/components/common/Table/ObjectTable';
-import { SlideInModal } from '@src/components/common/SlideInModal/SlideInModal';
 import { ConfirmModal } from '@src/components/common/ConfirmModal/ConfirmModal';
-
-const CATEGORIES = Object.keys(
-  VariableExpenseCategory
-) as VariableExpenseCategory[];
-
-function findCategory(idx: number) {
-  if (idx < 0) {
-    VariableExpenseCategory.Other;
-  }
-
-  return CATEGORIES[idx];
-}
+import { VariableExpensesModal } from './components/VariableExpensesModal';
 
 const StyledExpensesHeader = styled.header`
   width: 100%;
@@ -44,182 +19,8 @@ const StyledExpensesHeader = styled.header`
   background-color: ${({ theme }) => theme.colors.body.background};
 `;
 
-const StyledExpenseForm = styled.form`
-  width: 100%;
-  height: 100%;
-  padding: ${({ theme }) => theme.spacing['1']} 5%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: ${({ theme }) => theme.spacing['2']};
-
-  background-color: ${({ theme }) => theme.colors.primary.alt};
-`;
-
-const StyledInformationContainer = styled.div`
-  width: 100%;
-  padding: ${({ theme }) => theme.spacing['1']} 5%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: ${({ theme }) => theme.spacing['2']};
-
-  background-color: rgba(0, 0, 0, 0.15);
-  border-radius: ${({ theme }) => theme.borderRadius.M};
-`;
-
-type VariableExpenseModalProps = {
-  item?: VariableExpenseItem;
-  onClose: () => void;
-  onAdd: (item: VariableExpenseItem) => void;
-  onEdit: (item: VariableExpenseItem) => void;
-};
-
-const VariableExpenseModal: FunctionComponent<VariableExpenseModalProps> = ({
-  item,
-  onClose,
-  onAdd,
-  onEdit,
-}) => {
-  const [date, setDate] = useState(item?.date || new Date());
-  const [name, setName] = useState(item?.name || '');
-  const [amount, setAmount] = useState(item?.amount || '');
-  const [categoryIdx, setCategoryIdx] = useState(
-    item ? CATEGORIES.indexOf(item.category) : -1
-  );
-
-  const disableSubmit = useMemo(() => {
-    if (item) {
-      const isSameDate =
-        item.date.getDate() === date.getDate() &&
-        item.date.getMonth() === date.getMonth() &&
-        item.date.getFullYear() === date.getFullYear();
-      const isUnchanged =
-        isSameDate &&
-        item.name === name &&
-        item.amount === Number(amount) &&
-        item.category === findCategory(categoryIdx);
-
-      return (
-        isUnchanged || !name || Number.isNaN(amount) || Number(amount) <= 0
-      );
-    }
-
-    return !name || Number.isNaN(amount) || Number(amount) <= 0;
-  }, [date, name, amount, categoryIdx, item]);
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    if (disableSubmit) {
-      return;
-    }
-
-    if (item) {
-      const updatedItem: VariableExpenseItem = {
-        ...item,
-        date,
-        name,
-        amount: Number(amount),
-        category: findCategory(categoryIdx),
-      };
-
-      onEdit(updatedItem);
-    } else {
-      const newVariableExpense: VariableExpenseItem = {
-        id: createUUID(),
-        date,
-        name,
-        amount: Number(amount),
-        category: findCategory(categoryIdx),
-      };
-
-      onAdd(newVariableExpense);
-    }
-
-    setName('');
-    setAmount('');
-    setCategoryIdx(-1);
-    onClose();
-  }
-
-  return (
-    <SlideInModal
-      title={`${item ? `Edit "${item.name}"` : 'Add Variable Expense'}`}
-      onClose={onClose}
-      closeOnOverlayClick
-    >
-      <StyledExpenseForm onSubmit={handleSubmit}>
-        <DatePicker
-          label='Date'
-          date={date}
-          onChange={setDate}
-          customStyle={{
-            maxWidth: '100%',
-          }}
-        />
-
-        <Input
-          label='Name'
-          autoFocus
-          placeholder='Enter name'
-          value={name}
-          onChange={setName}
-          customStyle={{
-            maxWidth: '100%',
-          }}
-        />
-        <Input
-          label='Amount'
-          placeholder='Enter amount'
-          value={String(amount)}
-          onChange={setAmount}
-          inputMode='numeric'
-          filter='number'
-          customStyle={{
-            maxWidth: '100%',
-          }}
-        />
-
-        <Dropdown
-          label='Category'
-          placeholder='Select category'
-          selectedOptionIdx={categoryIdx}
-          options={CATEGORIES}
-          onChange={setCategoryIdx}
-          customStyle={{
-            maxWidth: '100%',
-          }}
-        />
-
-        <Button type='submit' disabled={disableSubmit}>
-          {item ? 'Save' : 'Submit'}
-        </Button>
-
-        {!item && (
-          <StyledInformationContainer>
-            <Text variant='label'>
-              Variables expenses are expenses that can vary from month to month.
-              Examples include groceries, gas, and entertainment, as well as any
-              other expenses that are not fixed.
-            </Text>
-          </StyledInformationContainer>
-        )}
-      </StyledExpenseForm>
-    </SlideInModal>
-  );
-};
-
 export const VariableExpensesPage: FunctionComponent = () => {
-  const {
-    variableExpenses,
-    addVariableExpense,
-    updateVariableExpense,
-    removeVariableExpense,
-  } = useExpenses();
+  const { variableExpenses, removeVariableExpense } = useExpenses();
   const [openVariableExpenseModal, setOpenVariableExpenseModal] =
     useState(false);
   const [confirmRemoveVariableExpense, setConfirmRemoveVariableExpense] =
@@ -258,17 +59,11 @@ export const VariableExpensesPage: FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      {openVariableExpenseModal && (
-        <VariableExpenseModal
-          item={variableExpenseItem}
-          onClose={() => {
-            setVariableExpenseItem(undefined);
-            setOpenVariableExpenseModal(false);
-          }}
-          onAdd={addVariableExpense}
-          onEdit={updateVariableExpense}
-        />
-      )}
+      <VariableExpensesModal
+        item={variableExpenseItem}
+        isOpen={openVariableExpenseModal}
+        setIsOpen={setOpenVariableExpenseModal}
+      />
 
       {confirmRemoveVariableExpense && !!variableExpenseItem && (
         <ConfirmModal
@@ -299,6 +94,12 @@ export const VariableExpensesPage: FunctionComponent = () => {
           No variable expenses yet
         </Text>
       )}
+
+      <Text>
+        Variables expenses are expenses that can vary from month to month.
+        Examples include groceries, gas, and entertainment, as well as any other
+        expenses that are not fixed.
+      </Text>
 
       <Table
         itemsPerPage={variableExpenses.length}
@@ -332,7 +133,7 @@ export const VariableExpensesPage: FunctionComponent = () => {
             label: 'Amount',
             component: item => (
               <Text fontWeight='bold' truncate>
-                {item.amount} kr
+                {formatNumber(item.amount)} kr
               </Text>
             ),
             sortable: true,
@@ -365,14 +166,6 @@ export const VariableExpensesPage: FunctionComponent = () => {
             },
           },
         ]}
-        // footer={{
-        //   label: 'Total',
-        //   component: () => (
-        //     <Text fontWeight='bold' color='primary'>
-        //       {formatNumber(sumFixedExpenses, 3)} kr
-        //     </Text>
-        //   ),
-        // }}
       />
     </React.Fragment>
   );
