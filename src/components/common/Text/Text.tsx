@@ -25,31 +25,6 @@ type TextProps = {
   title?: string;
 };
 
-function applyFontSize(type: TextProps['variant']) {
-  switch (type) {
-    case 'h1':
-      return '2rem';
-    case 'h2':
-      return '1.75rem';
-    case 'h3':
-      return '1.5rem';
-    case 'h4':
-      return '1.25rem';
-    case 'h5':
-      return '1rem';
-    case 'h6':
-      return '0.875rem';
-    case 'p':
-      return '1rem';
-    case 'span':
-      return '1rem';
-    case 'label':
-      return '0.875rem';
-    default:
-      return '1rem';
-  }
-}
-
 function applyFontWeight(
   type: TextProps['variant'],
   fontWeight?: TextProps['fontWeight']
@@ -88,9 +63,66 @@ function applyColor(color: TextProps['color'], theme: DefaultTheme) {
 }
 
 const StyledText = styled.p<TextProps>`
-  font-size: ${({ variant: type }) => applyFontSize(type)};
-  font-weight: ${({ variant: type, fontWeight }) =>
-    applyFontWeight(type, fontWeight)};
+  ${({ variant }) => {
+    switch (variant) {
+      case 'h1':
+        return css`
+          font-size: 2rem;
+
+          @media screen and (max-width: 768px) {
+            font-size: 1.75rem;
+          }
+        `;
+      case 'h2':
+        return css`
+          font-size: 1.75rem;
+
+          @media screen and (max-width: 768px) {
+            font-size: 1.5rem;
+          }
+        `;
+      case 'h3':
+        return css`
+          font-size: 1.5rem;
+
+          @media screen and (max-width: 768px) {
+            font-size: 1.25rem;
+          }
+        `;
+      case 'h4':
+        return css`
+          font-size: 1.25rem;
+
+          @media screen and (max-width: 768px) {
+            font-size: 1.125rem;
+          }
+        `;
+      case 'h5':
+        return css`
+          font-size: 1rem;
+        `;
+      case 'h6':
+        return css`
+          font-size: 0.875rem;
+        `;
+      case 'p':
+      case 'span':
+        return css`
+          font-size: 1rem;
+        `;
+      case 'label':
+        return css`
+          font-size: 0.875rem;
+        `;
+      default:
+        return css`
+          font-size: 1rem;
+        `;
+    }
+  }}
+
+  font-weight: ${({ variant, fontWeight }) =>
+    applyFontWeight(variant, fontWeight)};
   color: ${({ color, theme }) => applyColor(color, theme)};
 
   text-align: ${({ textAlign }) => textAlign};
@@ -103,6 +135,9 @@ const StyledText = styled.p<TextProps>`
   margin-right: ${({ margin }) => margin?.right};
 
   opacity: ${({ opaque }) => (opaque ? 0.75 : 1)};
+
+  // max 75 characters per line
+  max-width: calc(75ch + 1rem);
 
   ${({ truncate }) =>
     truncate &&
