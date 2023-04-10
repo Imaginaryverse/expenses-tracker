@@ -20,7 +20,7 @@ const StyledExpensesHeader = styled.header`
 `;
 
 export const VariableExpensesPage: FunctionComponent = () => {
-  const { variableExpenses, removeVariableExpense } = useExpenses();
+  const { currency, variableExpenses, removeVariableExpense } = useExpenses();
   const [openVariableExpenseModal, setOpenVariableExpenseModal] =
     useState(false);
   const [confirmRemoveVariableExpense, setConfirmRemoveVariableExpense] =
@@ -133,7 +133,7 @@ export const VariableExpensesPage: FunctionComponent = () => {
             label: 'Amount',
             component: item => (
               <Text fontWeight='bold' truncate>
-                {formatNumber(item.amount)} kr
+                {formatNumber(item.amount, { decimals: 2, currency })}
               </Text>
             ),
             sortable: true,

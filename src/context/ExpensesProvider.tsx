@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 
-import { FixedExpenseItem, VariableExpenseItem } from '../types';
+import { Currency, FixedExpenseItem, VariableExpenseItem } from '../types';
 
 /**
  * Converts all date strings in an object to Date objects.
@@ -18,6 +18,20 @@ function parseDateStringsInObject(obj: any) {
   }
 
   return temp;
+}
+
+function saveCurrency(currency: Currency) {
+  localStorage.setItem('currency', currency);
+}
+
+function loadCurrency(): Currency {
+  const currency = localStorage.getItem('currency');
+
+  if (!currency) {
+    return Currency.SEK;
+  }
+
+  return currency as Currency;
 }
 
 function loadMonthlyIncome(): number {
@@ -67,9 +81,11 @@ function saveVariableExpenses(variableExpenses: VariableExpenseItem[]) {
 }
 
 type ExpensesContextType = {
+  currency: Currency;
   monthlyIncome: number;
   fixedExpenses: FixedExpenseItem[];
   variableExpenses: VariableExpenseItem[];
+  updateCurrency: (currency: Currency) => void;
   updateMonthlyIncome: (income: number) => void;
   addFixedExpense: (fixedExpense: FixedExpenseItem) => void;
   addVariableExpense: (variableExpense: VariableExpenseItem) => void;
@@ -98,6 +114,7 @@ export const ExpensesProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [currency, setCurrency] = useState<Currency>(loadCurrency());
   const [monthlyIncome, setMonthlyIncome] = useState<number>(
     loadMonthlyIncome()
   );
@@ -109,6 +126,11 @@ export const ExpensesProvider = ({
   const [variableExpenses, setVariableExpenses] = useState<
     VariableExpenseItem[]
   >(loadVariableExpenses());
+
+  const updateCurrency = (currency: Currency) => {
+    setCurrency(currency);
+    saveCurrency(currency);
+  };
 
   const updateMonthlyIncome = (income: number) => {
     setMonthlyIncome(income);
@@ -170,9 +192,11 @@ export const ExpensesProvider = ({
   return (
     <ExpensesContext.Provider
       value={{
+        currency,
         monthlyIncome,
         fixedExpenses,
         variableExpenses,
+        updateCurrency,
         updateMonthlyIncome,
         addFixedExpense,
         addVariableExpense,

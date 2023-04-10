@@ -183,6 +183,7 @@ const FixedExpenseModal: FunctionComponent<FixedExpenseModalProps> = ({
 
 export const FixedExpensesPage: FunctionComponent = () => {
   const {
+    currency,
     fixedExpenses,
     addFixedExpense,
     updateFixedExpense,
@@ -293,7 +294,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
             label: 'Amount',
             component: item => (
               <Text fontWeight='bold' truncate>
-                {item.amount} kr
+                {formatNumber(item.amount, {
+                  decimals: 2,
+                  currency,
+                })}
               </Text>
             ),
             sortable: true,
@@ -316,7 +320,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
                 label: 'Per Year',
                 component: item => (
                   <Text fontWeight='bold'>
-                    {formatNumber(item.amount * 12, 2)} kr
+                    {formatNumber(item.amount * 12, {
+                      decimals: 2,
+                      currency,
+                    })}
                   </Text>
                 ),
               },
@@ -324,7 +331,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
                 label: 'Per Month',
                 component: item => (
                   <Text fontWeight='bold'>
-                    {formatNumber(item.amount, 2)} kr
+                    {formatNumber(item.amount, {
+                      decimals: 2,
+                      currency,
+                    })}
                   </Text>
                 ),
               },
@@ -332,7 +342,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
                 label: 'Per Week',
                 component: item => (
                   <Text fontWeight='bold'>
-                    {formatNumber(item.amount / 4, 2)} kr
+                    {formatNumber(item.amount / 4, {
+                      decimals: 2,
+                      currency,
+                    })}
                   </Text>
                 ),
               },
@@ -340,7 +353,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
                 label: 'Per Day',
                 component: item => (
                   <Text fontWeight='bold'>
-                    {formatNumber(item.amount / 30, 2)} kr
+                    {formatNumber(item.amount / 30, {
+                      decimals: 2,
+                      currency,
+                    })}
                   </Text>
                 ),
               },
@@ -348,7 +364,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
                 label: 'Per Hour',
                 component: item => (
                   <Text fontWeight='bold'>
-                    {formatNumber(item.amount / 720, 2)} kr
+                    {formatNumber(item.amount / 720, {
+                      decimals: 2,
+                      currency,
+                    })}
                   </Text>
                 ),
               },
@@ -356,7 +375,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
                 label: 'Per Minute',
                 component: item => (
                   <Text fontWeight='bold'>
-                    {formatNumber(item.amount / 43200, 2)} kr
+                    {formatNumber(item.amount / 43200, {
+                      decimals: 2,
+                      currency,
+                    })}
                   </Text>
                 ),
               },
@@ -385,7 +407,10 @@ export const FixedExpensesPage: FunctionComponent = () => {
           label: 'Total',
           component: () => (
             <Text fontWeight='bold' color='primary'>
-              {formatNumber(sumFixedExpenses, 3)} kr
+              {formatNumber(sumFixedExpenses, {
+                decimals: 2,
+                currency,
+              })}
             </Text>
           ),
         }}

@@ -1,8 +1,9 @@
-import { FunctionComponent, useMemo, useState } from 'react';
-import { Button, Input } from '@src/components/common';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { Button, Dropdown, Input } from '@src/components/common';
 import { SlideInModal } from '@src/components/common/SlideInModal/SlideInModal';
 import { useExpenses } from '@src/context/ExpensesProvider';
 import styled from 'styled-components';
+import { CURRENCIES, Currency } from '@src/types';
 
 const StyledNetIncomeForm = styled.form`
   width: 100%;
@@ -27,13 +28,17 @@ export const NetIncomeModal: FunctionComponent<NetIncomeModalProps> = ({
   isOpen,
   setIsOpen,
 }) => {
-  const { monthlyIncome, updateMonthlyIncome } = useExpenses();
+  const { currency, updateCurrency, monthlyIncome, updateMonthlyIncome } =
+    useExpenses();
 
-  const [value, setValue] = useState(monthlyIncome || '');
+  const [value, setValue] = useState('');
+  const [selectedCurrencyIdx, setSelectedCurrencyIdx] = useState(-1);
 
   const disableSubmit = useMemo(
-    () => !value || value === monthlyIncome,
-    [value, monthlyIncome]
+    () =>
+      Number(value) === monthlyIncome &&
+      CURRENCIES[selectedCurrencyIdx] === currency,
+    [selectedCurrencyIdx, currency, value, monthlyIncome]
   );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,8 +49,14 @@ export const NetIncomeModal: FunctionComponent<NetIncomeModalProps> = ({
     }
 
     updateMonthlyIncome(Number(value));
+    updateCurrency(CURRENCIES[selectedCurrencyIdx]);
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    setValue(String(monthlyIncome));
+    setSelectedCurrencyIdx(CURRENCIES.indexOf(currency));
+  }, [currency, monthlyIncome]);
 
   if (!isOpen) {
     return null;
@@ -63,8 +74,19 @@ export const NetIncomeModal: FunctionComponent<NetIncomeModalProps> = ({
           placeholder='Enter net income'
           value={String(value)}
           onChange={setValue}
+          autoFocus
           inputMode='numeric'
           filter='number'
+          customStyle={{
+            maxWidth: '100%',
+          }}
+        />
+
+        <Dropdown
+          label='Currency'
+          selectedOptionIdx={selectedCurrencyIdx}
+          options={Object.keys(Currency)}
+          onChange={setSelectedCurrencyIdx}
           customStyle={{
             maxWidth: '100%',
           }}

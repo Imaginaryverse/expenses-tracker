@@ -33,7 +33,7 @@ const StyledNetIncomeMessage = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.M};
 `;
 
-const StyledIncomeDetails = styled.div`
+const StyledSection = styled.section`
   width: 100%;
 
   display: flex;
@@ -53,14 +53,25 @@ function getExpensesThisMonth(variableExpenses: VariableExpenseItem[]) {
 }
 
 export const HomePage: FunctionComponent = () => {
-  const { monthlyIncome, variableExpenses } = useExpenses();
+  const { currency, monthlyIncome, variableExpenses, fixedExpenses } =
+    useExpenses();
   const [openVariableExpensesModal, setOpenVariableExpensesModal] =
     useState(false);
   const [openNetIncomeModal, setOpenNetIncomeModal] = useState(false);
 
-  const expensesThisMonth = useMemo(
+  const variableExpensesThisMonth = useMemo(
     () => getExpensesThisMonth(variableExpenses),
     [variableExpenses]
+  );
+
+  const sumVariableExpensesThisMonth = useMemo(
+    () => variableExpensesThisMonth.reduce((acc, curr) => acc + curr.amount, 0),
+    [variableExpensesThisMonth]
+  );
+
+  const sumFixedExpenses = useMemo(
+    () => fixedExpenses.reduce((acc, curr) => acc + curr.amount, 0),
+    [fixedExpenses]
   );
 
   const currentMonth = getNameOfMonth(new Date());
@@ -68,7 +79,9 @@ export const HomePage: FunctionComponent = () => {
   return (
     <React.Fragment>
       <StyledHeader>
-        <Text variant='h1'>Net Income: {formatNumber(monthlyIncome)} kr</Text>
+        <Text variant='h2'>
+          Net Income: {formatNumber(monthlyIncome, { currency })}
+        </Text>
         <Button
           onClick={() => {
             if (openVariableExpensesModal) {
@@ -84,24 +97,31 @@ export const HomePage: FunctionComponent = () => {
       </StyledHeader>
 
       {!!monthlyIncome && (
-        <StyledIncomeDetails>
+        <StyledSection>
           <Text>
             Over the course of a year, you will have earned a total of{' '}
-            <b>{formatNumber(monthlyIncome * 12)}</b> kr in net income.
+            <b>{formatNumber(monthlyIncome * 12, { decimals: 2, currency })}</b>{' '}
+            in net income.
           </Text>
 
           <Text>
-            This is equivalent to <b>{formatNumber(monthlyIncome / 4, 2)}</b> kr
-            per week,
-            <b>{formatNumber(monthlyIncome / 30, 2)}</b> kr per day, and{' '}
-            <b>{formatNumber(monthlyIncome / 30 / 24, 2)}</b> kr per hour.
+            This is equivalent to{' '}
+            <b>{formatNumber(monthlyIncome / 4, { decimals: 2, currency })}</b>{' '}
+            per week,{' '}
+            <b>{formatNumber(monthlyIncome / 30, { decimals: 2, currency })}</b>{' '}
+            per day, and{' '}
+            <b>
+              {formatNumber(monthlyIncome / 30 / 24, { decimals: 2, currency })}
+            </b>{' '}
+            per hour.
           </Text>
 
           <Text>
-            You earn 1 million kr every{' '}
-            <b>{formatNumber(1000000 / monthlyIncome / 12, 2)}</b> years.
+            You earn {formatNumber(1000000, { currency })} (one million) every{' '}
+            <b>{formatNumber(1000000 / monthlyIncome / 12, { decimals: 2 })}</b>{' '}
+            years.
           </Text>
-        </StyledIncomeDetails>
+        </StyledSection>
       )}
 
       {!monthlyIncome && (
@@ -134,7 +154,42 @@ export const HomePage: FunctionComponent = () => {
       />
 
       <StyledHeader>
-        <Text variant='h1'>Variable Expenses: {currentMonth}</Text>
+        <Text variant='h2'>
+          Fixed Expenses:{' '}
+          {formatNumber(sumFixedExpenses, { decimals: 2, currency })}
+        </Text>
+        <Button disabled>
+          <Icon icon='edit' marginRight='0.25rem' />
+          Edit
+        </Button>
+      </StyledHeader>
+
+      <StyledSection>
+        <Text>
+          The sum of your fixed expenses accounts for{' '}
+          <b>
+            {formatNumber((sumFixedExpenses / monthlyIncome) * 100, {
+              decimals: 2,
+            })}
+            %
+          </b>{' '}
+          of your monthly net income.
+        </Text>
+
+        <Text>
+          The remaining budget for variable expenses per month is{' '}
+          <b>
+            {formatNumber(monthlyIncome - sumFixedExpenses, {
+              decimals: 2,
+              currency,
+            })}
+          </b>
+          .
+        </Text>
+      </StyledSection>
+
+      <StyledHeader>
+        <Text variant='h2'>Variable Expenses: {currentMonth}</Text>
         <Button
           onClick={() => {
             if (openNetIncomeModal) {
@@ -148,20 +203,46 @@ export const HomePage: FunctionComponent = () => {
         </Button>
       </StyledHeader>
 
-      <Text>
-        Your variable expenses for {currentMonth}. Add new expenses by clicking
-        the "Add" button above.
-      </Text>
+      <StyledSection>
+        <Text>
+          You have spent a total of{' '}
+          <b>
+            {formatNumber(sumVariableExpensesThisMonth, {
+              decimals: 2,
+              currency,
+            })}
+          </b>{' '}
+          (
+          {formatNumber(
+            (sumVariableExpensesThisMonth /
+              (monthlyIncome - sumFixedExpenses)) *
+              100,
+            { decimals: 2 }
+          )}
+          %) of your budget this month.
+        </Text>
+
+        <Text>
+          Remaining:{' '}
+          <b>
+            {formatNumber(
+              monthlyIncome - sumFixedExpenses - sumVariableExpensesThisMonth,
+              { decimals: 2, currency }
+            )}
+          </b>
+          .
+        </Text>
+      </StyledSection>
 
       <VariableExpensesModal
         isOpen={openVariableExpensesModal}
         setIsOpen={setOpenVariableExpensesModal}
       />
 
-      {!!expensesThisMonth.length && (
+      {!!variableExpensesThisMonth.length && (
         <Table
           showIndices
-          data={expensesThisMonth}
+          data={variableExpensesThisMonth}
           columns={[
             {
               label: 'Date',
@@ -183,7 +264,7 @@ export const HomePage: FunctionComponent = () => {
               label: 'Amount',
               component: item => (
                 <Text truncate fontWeight='bold'>
-                  {item.amount} kr
+                  {formatNumber(item.amount, { decimals: 2, currency })}
                 </Text>
               ),
             },

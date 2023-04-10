@@ -16,6 +16,18 @@ const StyledApp = styled.div`
   background-color: ${({ theme }) => theme.colors.body.background};
 `;
 
+const Footer = styled.footer`
+  width: 100%;
+  min-height: 4rem;
+  padding: ${({ theme }) => theme.spacing['1']} 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.body.background};
+`;
+
 export const Layout: FunctionComponent = () => {
   return (
     <StyledApp>
@@ -23,6 +35,7 @@ export const Layout: FunctionComponent = () => {
       <Page>
         <Outlet />
       </Page>
+      <Footer />
     </StyledApp>
   );
 };

@@ -6,6 +6,8 @@ export const scrollbarStyle = css`
     width: 0.5rem;
 
     background: ${({ theme }) => theme.colors.primary.alt};
+
+    border-radius: ${({ theme }) => theme.borderRadius.M};
   }
 
   &::-webkit-scrollbar-track {
